@@ -7,6 +7,7 @@ var http = require('http'),
     cors = require('cors'),
     passport = require('passport'),
     errorhandler = require('errorhandler'),
+    multer = require('multer'),
     mongoose = require('mongoose');
 
 var isProduction = process.env.NODE_ENV === 'production';
@@ -40,6 +41,8 @@ if(isProduction){
 require('./models/User');
 require('./models/Article');
 require('./models/Comment');
+require('./models/Basic');
+require('./models/Master');
 require('./config/passport');
 
 app.use(require('./routes'));
