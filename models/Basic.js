@@ -48,19 +48,4 @@ BasicSchema.methods.toJSONFor = function(user){
     };
 };
 
-BasicSchema.methods.toJSONBy = function(){
-    return {
-        slug: this.slug,
-        category: this.category,
-        video: this.video,
-        video2: this.video2,
-        notes: this.notes,
-        name: this.name,
-        reviewed: this.reviewed,
-        reviewedBy: this.reviewedBy,
-        createdAt: this.createdAt,
-        updatedAt: this.updatedAt
-    };
-};
-
 mongoose.model('Basic', BasicSchema);

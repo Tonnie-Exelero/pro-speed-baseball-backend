@@ -263,18 +263,27 @@ router.put('/update', auth.required, function(req, res, next) {
         query.slug = req.query.slug
     }
 
-    Basic.find({slug: query.slug}).then(function(results){
+    User.findById(req.payload.id).then(function(user) {
+        if (!user) {
+            return res.sendStatus(401);
+        }
+
+    Basic.find({slug: query.slug})
+        .then(function(results){
         results[0].reviewed = req.body.basic.reviewed;
 
         results[0].reviewedBy = req.body.basic.reviewedBy;
 
         results[0].video2 = req.body.basic.video2;
 
-        var user = results[0].author;
+        // var user = results[0].author;
+
+        console.log(results[0]);
 
         return results[0].save().then(function(review){
-            return res.json({review: review.toJSONFor(user)});
+            return res.json({review: review.toJSON()});
         }).catch(next);
+    });
     });
 });
 
