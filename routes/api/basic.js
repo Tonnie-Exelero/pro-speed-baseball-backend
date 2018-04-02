@@ -8,6 +8,7 @@ var User = mongoose.model('User');
 var Basic = mongoose.model('Basic');
 var auth = require('../auth');
 var multer = require('multer');
+var nodemailer = require('nodemailer');
 
 // Preload video objects on routes with ':basic'
 router.param('basic', function(req, res, next, slug) {
@@ -32,7 +33,29 @@ router.post('/upload', auth.required, function(req, res, next) {
         basic.author = user;
 
         return basic.save().then(function(){
-            console.log(basic.author);
+            var transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: 'dudevegan@gmail.com',
+                    pass: 'project1234'
+                }
+            });
+
+            var mailOptions = {
+                from: 'dudevegan@gmail.com',
+                to: user.email,
+                subject: 'Video successfully uploaded!',
+                text: 'Your video was successfully uploaded to Pro Speed Baseball. You will be notified when it is reviewed.'
+            };
+
+            transporter.sendMail(mailOptions, function(error, info){
+                if (error) {
+                    console.log(error);
+                } else {
+                    console.log('Email sent: ' + info.response);
+                }
+            });
+
             return res.json({basic: basic.toJSONFor(user)});
         });
     }).catch(next);
@@ -121,6 +144,31 @@ router.get('/reviews', auth.optional, function(req, res, next) {
             });
         }).catch(next);
    });
+});
+
+router.put('/update', auth.required, function(req, res, next) {
+    var query = {};
+
+    if (req.query.slug) {
+        query.slug = req.query.slug
+    }
+
+    User.findById(req.payload.id).then(function(user) {
+        if (!user) {
+            return res.sendStatus(401);
+        }
+
+        Basic.find({slug: query.slug})
+            .then(function(results){
+                results[0].reviewChecked = req.body.basic.reviewChecked;
+
+                console.log(results[0]);
+
+                return results[0].save().then(function(review){
+                    return res.json({review: review.toJSON()});
+                }).catch(next);
+            });
+    });
 });
 
 module.exports = router;

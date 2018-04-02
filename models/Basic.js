@@ -12,9 +12,11 @@ var BasicSchema = new mongoose.Schema({
     video: String,
     video2: String,
     notes: String,
+    notes2: String,
     name: String,
     reviewed: Boolean,
     reviewedBy: String,
+    reviewChecked: Boolean,
     author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 }, {timestamps: true});
 
@@ -39,9 +41,11 @@ BasicSchema.methods.toJSONFor = function(user){
         video: this.video,
         video2: this.video2,
         notes: this.notes,
+        notes2: this.notes2,
         name: this.name,
         reviewed: this.reviewed,
         reviewedBy: this.reviewedBy,
+        reviewChecked: this.reviewChecked,
         createdAt: this.createdAt,
         updatedAt: this.updatedAt,
         author: this.author.toProfileJSONFor(user)

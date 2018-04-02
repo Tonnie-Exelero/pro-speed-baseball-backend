@@ -119,13 +119,13 @@ router.get('/instructors', auth.optional, function(req, res, next) {
     }
 
     return Promise.all([
-        User.find({role: ['All_Instructor_User', 'Unlimited_Instructor_User', 'Master_User']})
+        User.find({role: 'All_Instructor_User'})
             .limit(Number(limit))
             .skip(Number(offset))
             .sort({createdAt: 'desc'})
             .populate('author')
             .exec(),
-        User.count({role: ['All_Instructor_User', 'Unlimited_Instructor_User', 'Master_User']}).exec(),
+        User.count({role: 'All_Instructor_User'}).exec(),
         req.payload ? User.findById(req.payload.id) : null
     ]).then(function (results) {
         var instructors = results[0];

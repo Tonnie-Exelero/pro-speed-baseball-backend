@@ -9,6 +9,7 @@ var Basic = mongoose.model('Basic');
 var auth = require('../auth');
 var download = require('download-file');
 var path = require('path');
+var nodemailer = require('nodemailer');
 
 // Preload article objects on routes with ':instructor'
 router.param('instructor', function(req, res, next, slug) {
@@ -48,6 +49,8 @@ router.get('/reviews', auth.optional, function(req, res, next) {
             if (author) {
                 query.author = author._id;
             }
+
+            query.reviewed = false;
 
             return Promise.all([
                 Basic.find(query)
@@ -268,22 +271,49 @@ router.put('/update', auth.required, function(req, res, next) {
             return res.sendStatus(401);
         }
 
-    Basic.find({slug: query.slug})
-        .then(function(results){
-        results[0].reviewed = req.body.basic.reviewed;
+        Basic.find({slug: query.slug})
+            .then(function(results){
+                results[0].reviewed = req.body.basic.reviewed;
 
-        results[0].reviewedBy = req.body.basic.reviewedBy;
+                results[0].reviewedBy = req.body.basic.reviewedBy;
 
-        results[0].video2 = req.body.basic.video2;
+                results[0].reviewChecked = req.body.basic.reviewChecked;
 
-        // var user = results[0].author;
+                results[0].video2 = req.body.basic.video2;
 
-        console.log(results[0]);
+                results[0].notes2 = req.body.basic.notes2;
 
-        return results[0].save().then(function(review){
-            return res.json({review: review.toJSON()});
-        }).catch(next);
-    });
+                // var user = results[0].author;
+
+                console.log(results[0]);
+
+                return results[0].save().then(function(review){
+                    var transporter = nodemailer.createTransport({
+                        service: 'gmail',
+                        auth: {
+                            user: 'dudevegan@gmail.com',
+                            pass: 'project1234'
+                        }
+                    });
+
+                    var mailOptions = {
+                        from: 'dudevegan@gmail.com',
+                        to: user.email,
+                        subject: 'Video has been reviewed!',
+                        text: 'Your video has been reviewed. Login into your account and check the updates.'
+                    };
+
+                    transporter.sendMail(mailOptions, function(error, info){
+                        if (error) {
+                            console.log(error);
+                        } else {
+                            console.log('Email sent: ' + info.response);
+                        }
+                    });
+
+                    return res.json({review: review.toJSON()});
+                }).catch(next);
+            });
     });
 });
 
