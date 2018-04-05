@@ -258,4 +258,65 @@ router.get('/instructorNumbers', auth.optional, function(req, res, next) {
     }).catch(next);
 });
 
+//Get all users
+router.get('/allUsers', auth.optional, function(req, res, next) {
+    var query = {};
+    var limit = 20;
+    var offset = 0;
+
+    if(typeof req.query.limit !== 'undefined'){
+        limit = req.query.limit;
+    }
+
+    if(typeof req.query.offset !== 'undefined'){
+        offset = req.query.offset;
+    }
+
+    return Promise.all([
+        User.find()
+            .limit(Number(limit))
+            .skip(Number(offset))
+            .sort({createdAt: 'desc'})
+            .populate('author')
+            .exec(),
+        User.count().exec(),
+        req.payload ? User.findById(req.payload.id) : null
+    ]).then(function (results) {
+        var users = results[0];
+        var usersCount = results[1];
+
+        return res.json({
+            users: users.map(function (user) {
+                return user.toJSON();
+            }),
+            usersCount: usersCount
+        })
+    }).catch(next);
+});
+
+router.put('/update', auth.required, function(req, res, next) {
+    var query = {};
+
+    if (req.query.id) {
+        query.id = req.query.id
+    }
+
+    /*User.findById(req.payload.id).then(function(user) {
+        if (!user) {
+            return res.sendStatus(401);
+        }
+*/
+        User.find({_id: query.id})
+            .then(function(results){
+                results[0].active = req.body.user.active;
+
+                console.log(results[0]);
+
+                return results[0].save().then(function(user){
+                    return res.json({user: user.toProfileJSONFor(user)});
+                }).catch(next);
+            });
+    // });
+});
+
 module.exports = router;

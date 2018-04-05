@@ -29,6 +29,9 @@ router.put('/user', auth.required, function(req, res, next){
         if(typeof req.body.user.bio !== 'undefined'){
             user.bio = req.body.user.bio;
         }
+        if(typeof req.body.user.active !== 'undefined'){
+            user.active = req.body.user.active;
+        }
         if(typeof req.body.user.image !== 'undefined'){
             user.image = req.body.user.image;
         }
@@ -55,8 +58,12 @@ router.post('/users/login', function(req, res, next){
         if(err){ return next(err); }
 
         if(user){
-            user.token = user.generateJWT();
-            return res.json({user: user.toAuthJSON()});
+            if (user.active === true) {
+                user.token = user.generateJWT();
+                return res.json({user: user.toAuthJSON()});
+            } else {
+                return res.status(422).json(info);
+            }
         } else {
             return res.status(422).json(info);
         }
@@ -67,6 +74,7 @@ router.post('/users', function(req, res, next){
     var user = new User();
 
     user.role = req.body.user.role;
+    user.active = req.body.user.active;
     user.username = req.body.user.username;
     user.email = req.body.user.email;
     user.setPassword(req.body.user.password);
