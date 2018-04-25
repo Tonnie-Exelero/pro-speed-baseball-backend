@@ -9,7 +9,7 @@ var User = mongoose.model('User');
 var BasicSchema = new mongoose.Schema({
     slug: {type: String, lowercase: true, unique: true},
     category: String,
-    video: String,
+    video: Array,
     video2: String,
     notes: String,
     notes2: String,

@@ -15,7 +15,14 @@ var isProduction = process.env.NODE_ENV === 'production';
 // Create global app object
 var app = express();
 
-app.use(cors());
+// app.use(cors());
+
+app.use(function(req, res, next){
+    res.append('Access-Control-Allow-Origin', ['*']);
+    res.append('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
+    res.append('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    next();
+});
 
 // Normal express config defaults
 app.use(require('morgan')('dev'));
@@ -28,14 +35,14 @@ app.use(express.static(__dirname + '/public'));
 app.use(session({ secret: 'conduit', cookie: { maxAge: 60000 }, resave: false, saveUninitialized: false  }));
 
 if (!isProduction) {
-  app.use(errorhandler());
+    app.use(errorhandler());
 }
 
 if(isProduction){
-  mongoose.connect(process.env.MONGODB_URI);
+    mongoose.connect(process.env.MONGODB_URI);
 } else {
-  mongoose.connect('mongodb://localhost/conduit');
-  mongoose.set('debug', true);
+    mongoose.connect('mongodb://localhost/conduit');
+    mongoose.set('debug', true);
 }
 
 require('./models/User');
@@ -49,9 +56,9 @@ app.use(require('./routes'));
 
 /// catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
+    var err = new Error('Not Found');
+    err.status = 404;
+    next(err);
 });
 
 /// error handlers
@@ -59,28 +66,28 @@ app.use(function(req, res, next) {
 // development error handler
 // will print stacktrace
 if (!isProduction) {
-  app.use(function(err, req, res, next) {
-    console.log(err.stack);
+    app.use(function(err, req, res, next) {
+        console.log(err.stack);
 
-    res.status(err.status || 500);
+        res.status(err.status || 500);
 
-    res.json({'errors': {
-      message: err.message,
-      error: err
-    }});
-  });
+        res.json({'errors': {
+            message: err.message,
+            error: err
+        }});
+    });
 }
 
 // production error handler //no stacktraces leaked to user
 app.use(function(err, req, res, next) {
-  res.status(err.status || 500);
-  res.json({'errors': {
-    message: err.message,
-    error: {}
-  }});
+    res.status(err.status || 500);
+    res.json({'errors': {
+        message: err.message,
+        error: {}
+    }});
 });
 
 // finally, let's start our server...
-var server = app.listen( process.env.PORT || 3000, function(){
-  console.log('Listening on port ' + server.address().port);
+var server = app.listen( process.env.PORT || 8080, function(){
+    console.log('Listening on port ' + server.address().port);
 });

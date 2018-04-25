@@ -8,6 +8,7 @@ var User = mongoose.model('User');
 var Basic = mongoose.model('Basic');
 var auth = require('../auth');
 var multer = require('multer');
+var path = require('path');
 var nodemailer = require('nodemailer');
 
 // Preload video objects on routes with ':basic'
@@ -37,7 +38,7 @@ router.post('/upload', auth.required, function(req, res, next) {
                 service: 'gmail',
                 auth: {
                     user: 'dudevegan@gmail.com',
-                    pass: 'project1234'
+                    pass: 'project12345'
                 }
             });
 
@@ -77,7 +78,7 @@ router.post('/videoUpload', auth.required, function(req, res, next) {
                 cb(null, file.originalname)
             },
             path: function () {
-                
+
             }
         });
 
@@ -90,6 +91,7 @@ router.post('/videoUpload', auth.required, function(req, res, next) {
                 res.json({error_code:1, err_desc:err});
                 return;
             }
+
             res.json({error_code:0, err_desc:null});
         });
     }).catch(next);
@@ -169,6 +171,19 @@ router.put('/update', auth.required, function(req, res, next) {
                 }).catch(next);
             });
     });
+});
+
+// Get video file
+router.get('/getVideo', auth.optional, function(req, res, next) {
+    var query = {};
+
+    if (req.query.video) {
+        query.video = req.query.video
+    }
+
+    var way = path.resolve(".") + '/uploads/' + query.video;
+
+    return res.json({theVideo: way}); // download function
 });
 
 module.exports = router;

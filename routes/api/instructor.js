@@ -292,7 +292,7 @@ router.put('/update', auth.required, function(req, res, next) {
                         service: 'gmail',
                         auth: {
                             user: 'dudevegan@gmail.com',
-                            pass: 'project1234'
+                            pass: 'project12345'
                         }
                     });
 

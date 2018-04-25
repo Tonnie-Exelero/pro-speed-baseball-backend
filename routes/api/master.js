@@ -301,14 +301,28 @@ router.put('/update', auth.required, function(req, res, next) {
         query.id = req.query.id
     }
 
-    /*User.findById(req.payload.id).then(function(user) {
-        if (!user) {
-            return res.sendStatus(401);
-        }
-*/
-        User.find({_id: query.id})
+    User.find({_id: query.id})
             .then(function(results){
-                results[0].active = req.body.user.active;
+                console.log(results[0]);
+
+                if(typeof req.body.user.username !== 'undefined'){
+                    results[0].username = req.body.user.username;
+                }
+                if(typeof req.body.user.email !== 'undefined'){
+                    results[0].email = req.body.user.email;
+                }
+                if(typeof req.body.user.role !== 'undefined'){
+                    results[0].role = req.body.user.role;
+                }
+                if(typeof req.body.user.bio !== 'undefined'){
+                    results[0].bio = req.body.user.bio;
+                }
+                if(typeof req.body.user.active !== 'undefined'){
+                    results[0].active = req.body.user.active;
+                }
+                if(typeof req.body.user.password !== 'undefined'){
+                    results[0].setPassword(req.body.user.password);
+                }
 
                 console.log(results[0]);
 
@@ -316,7 +330,52 @@ router.put('/update', auth.required, function(req, res, next) {
                     return res.json({user: user.toProfileJSONFor(user)});
                 }).catch(next);
             });
-    // });
+});
+
+// Return a user
+router.get('/user', auth.optional, function(req, res, next) {
+    var query = {};
+
+    if (req.query.id) {
+        query.id = req.query.id
+    }
+
+    User.find({_id: query.id})
+        .populate('author')
+        .then(function (results) {
+            var user = results[0];
+            // var user = results[1];
+
+            return res.json({user: user.toJSON()});
+        }).catch(next);
+});
+
+// Update single user
+router.get('/updateUser', auth.optional, function(req, res, next) {
+    var query = {};
+
+    if (req.query.id) {
+        query.id = req.query.id
+    }
+
+    User.find({_id: query.id})
+        .then(function(results){
+            results[0].username = req.body.user.username;
+
+            results[0].role = req.body.user.role;
+
+            results[0].bio = req.body.user.bio;
+
+            results[0].email = req.body.user.email;
+
+            results[0].password = req.body.user.password;
+
+            console.log(results[0]);
+
+            return results[0].save().then(function(user){
+                return res.json({user: user.toProfileJSONFor(user)});
+            }).catch(next);
+        });
 });
 
 module.exports = router;
